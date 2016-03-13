@@ -1,0 +1,8 @@
+[package]
+name = "tremor"
+version = "0.1.0"
+authors = ["Paul Lietar <paul@lietar.net>"]
+
+[dependencies]
+libc = "*"
+tremor-sys = { path = "tremor-sys" }
