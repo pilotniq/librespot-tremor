@@ -1,8 +1,14 @@
+extern crate pkg_config;
 extern crate gcc;
 
 use std::path::PathBuf;
 
 fn main() {
+    match pkg_config::probe_library("vorbisidec") {
+        Ok(_) => return,
+        Err(..) => {}
+    };
+
     let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
 
     let tremor_include = root.join("tremor/include");
