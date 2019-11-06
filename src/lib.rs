@@ -1,5 +1,6 @@
-extern crate tremor_sys;
+mod tremor_sys;
 extern crate libc;
+extern crate ogg_sys;
 
 use std::io::{self, Read, Seek};
 
@@ -9,10 +10,10 @@ pub struct Decoder<R> where R: Read + Seek {
     data: Box<DecoderData<R>>,
 }
 
-/// 
+///
 pub struct PacketsIter<'a, R: 'a + Read + Seek>(&'a mut Decoder<R>);
 
-/// 
+///
 pub struct PacketsIntoIter<R: Read + Seek>(Decoder<R>);
 
 /// Errors that can happen while decoding

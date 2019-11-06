@@ -1,8 +1,13 @@
 [package]
-name = "tremor"
+name = "librespot-tremor"
 version = "0.1.0"
-authors = ["Paul Lietar <paul@lietar.net>"]
+authors = ["Librespot Org"]
+build = "build.rs"
 
 [dependencies]
 libc = "*"
-tremor-sys = { path = "tremor-sys" }
+ogg-sys = "*"
+
+[build-dependencies]
+cc = "1.0.47"
+pkg-config = "0.3"

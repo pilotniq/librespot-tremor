@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
+#![allow(dead_code)]
 
 extern crate libc;
-extern crate ogg_sys;
 
 use libc::{c_int, c_long, c_char, c_void};
 

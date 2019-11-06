@@ -1,5 +1,5 @@
 extern crate pkg_config;
-extern crate gcc;
+extern crate cc;
 
 use std::path::PathBuf;
 
@@ -16,7 +16,7 @@ fn main() {
 
     println!("cargo:include={}", tremor_include.display());
 
-    gcc::Config::new()
+    cc::Build::new()
                 .file("tremor/mdct.c")
                 .file("tremor/block.c")
                 .file("tremor/window.c")
