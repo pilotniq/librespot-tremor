@@ -31,28 +31,26 @@ pub enum VorbisError {
 }
 
 impl std::error::Error for VorbisError {
-    fn description(&self) -> &str {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            &VorbisError::ReadError(_) => "A read from media returned an error",
-            &VorbisError::NotVorbis => "Bitstream does not contain any Vorbis data",
-            &VorbisError::VersionMismatch => "Vorbis version mismatch",
-            &VorbisError::BadHeader => "Invalid Vorbis bitstream header",
-            &VorbisError::InitialFileHeadersCorrupt => "Initial file headers are corrupt",
-            &VorbisError::Hole => "Interruption of data",
-        }
-    }
-
-    fn cause(&self) -> Option<&std::error::Error> {
-        match self {
-            &VorbisError::ReadError(ref err) => Some(err as &std::error::Error),
-            _ => None
+            VorbisError::ReadError(ref err) => Some(err),
+            _ => None,
         }
     }
 }
 
 impl std::fmt::Display for VorbisError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(fmt, "{}", std::error::Error::description(self))
+        let description = match self {
+            VorbisError::ReadError(_) => "A read from media returned an error",
+            VorbisError::NotVorbis => "Bitstream does not contain any Vorbis data",
+            VorbisError::VersionMismatch => "Vorbis version mismatch",
+            VorbisError::BadHeader => "Invalid Vorbis bitstream header",
+            VorbisError::InitialFileHeadersCorrupt => "Initial file headers are corrupt",
+            VorbisError::Hole => "Interruption of data",
+        };
+
+        fmt.write_str(description)
     }
 }
 
