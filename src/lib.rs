@@ -113,7 +113,7 @@ impl<R> Decoder<R> where R: Read + Seek {
 
             let ptr = ptr as *mut u8;
 
-            let data: &mut DecoderData<R> = unsafe { std::mem::transmute(datasource) };
+            let data: &mut DecoderData<R> = unsafe { &mut *(datasource as *mut _) };
 
             let buffer = unsafe { slice::from_raw_parts_mut(ptr as *mut u8, nmemb as usize) };
 
@@ -132,7 +132,7 @@ impl<R> Decoder<R> where R: Read + Seek {
         extern fn seek_func<R>(datasource: *mut libc::c_void, offset: tremor_sys::ogg_int64_t,
             whence: libc::c_int) -> libc::c_int where R: Read + Seek
         {
-            let data: &mut DecoderData<R> = unsafe { std::mem::transmute(datasource) };
+            let data: &mut DecoderData<R> = unsafe { &mut *(datasource as *mut _) };
 
             let result = match whence {
                 libc::SEEK_SET => data.reader.seek(io::SeekFrom::Start(offset as u64)),
@@ -150,7 +150,7 @@ impl<R> Decoder<R> where R: Read + Seek {
         extern fn tell_func<R>(datasource: *mut libc::c_void) -> libc::c_long
             where R: Read + Seek
         {
-            let data: &mut DecoderData<R> = unsafe { std::mem::transmute(datasource) };
+            let data: &mut DecoderData<R> = unsafe { &mut *(datasource as *mut DecoderData<R>) };
             data.reader.seek(io::SeekFrom::Current(0)).map(|v| v as libc::c_long).unwrap_or(-1)
         }
 
@@ -239,7 +239,7 @@ impl<R> Decoder<R> where R: Read + Seek {
                 let infos = unsafe { tremor_sys::ov_info(&mut self.data.vorbis,
                     self.data.current_logical_bitstream) };
 
-                let infos: &tremor_sys::vorbis_info = unsafe { std::mem::transmute(infos) };
+                let infos: &tremor_sys::vorbis_info = unsafe { &*infos };
 
                 Some(Ok(Packet {
                     data: buffer,
