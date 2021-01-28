@@ -5,8 +5,6 @@ extern crate ogg_sys;
 use std::io::{self, Read, Seek};
 use std::mem::MaybeUninit;
 
-use tremor_sys::OggVorbis_File;
-
 /// Allows you to decode a sound file stream into packets.
 pub struct Decoder<R> where R: Read + Seek {
     // further informations are boxed so that a pointer can be passed to callbacks

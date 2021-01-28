@@ -7,8 +7,8 @@ extern crate libc;
 use libc::{c_int, c_long, c_char, c_void};
 
 pub use ogg_sys::ogg_int64_t;
-pub type ogg_int32_t = libc::int32_t;
-pub type ogg_uint32_t = libc::uint32_t;
+pub type ogg_int32_t = i32;
+pub type ogg_uint32_t = u32;
 
 pub const OV_FALSE: c_int = -1;
 pub const OV_EOF: c_int = -2;

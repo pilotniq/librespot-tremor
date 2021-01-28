@@ -4,10 +4,9 @@ extern crate cc;
 use std::path::PathBuf;
 
 fn main() {
-    match pkg_config::probe_library("vorbisidec") {
-        Ok(_) => return,
-        Err(..) => {}
-    };
+    if pkg_config::probe_library("vorbisidec").is_ok() {
+        return;
+    }
 
     let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
 
