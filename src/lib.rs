@@ -3,6 +3,7 @@ extern crate libc;
 extern crate ogg_sys;
 
 use std::io::{self, Read, Seek};
+use std::mem::MaybeUninit;
 
 use tremor_sys::OggVorbis_File;
 
@@ -61,8 +62,20 @@ impl From<io::Error> for VorbisError {
     }
 }
 
+#[repr(C)]
 struct DecoderData<R> where R: Read + Seek {
     vorbis: tremor_sys::OggVorbis_File,
+    reader: R,
+    current_logical_bitstream: libc::c_int,
+    read_error: Option<io::Error>,
+}
+
+#[repr(C)]
+struct DecoderDataUninit<R>
+where
+    R: Read + Seek,
+{
+    vorbis: MaybeUninit<tremor_sys::OggVorbis_File>,
     reader: R,
     current_logical_bitstream: libc::c_int,
     read_error: Option<io::Error>,
@@ -156,14 +169,8 @@ impl<R> Decoder<R> where R: Read + Seek {
             close_func: close_func::<R>,
         };
 
-        const SIZE_OF_VORBIS: usize = std::mem::size_of::<OggVorbis_File>();
-        let mut data = Box::new(DecoderData {
-            vorbis: unsafe {
-                //mem::zeroed not allowed here, so transmute from empty mem.
-                //UB, but this needs to be initialized from C.
-                //TODO: switch data to maybe uninit
-                std::mem::transmute::<[u8; SIZE_OF_VORBIS], OggVorbis_File>([0u8; SIZE_OF_VORBIS])
-            },
+        let mut data = Box::new(DecoderDataUninit {
+            vorbis: MaybeUninit::uninit(),
             reader: input,
             current_logical_bitstream: 0,
             read_error: None,
@@ -171,15 +178,19 @@ impl<R> Decoder<R> where R: Read + Seek {
 
         // initializing
         unsafe {
-            let data_ptr = &mut *data as *mut DecoderData<R>;
-            let data_ptr = data_ptr as *mut libc::c_void;
-            try!(check_errors(tremor_sys::ov_open_callbacks(data_ptr, &mut data.vorbis,
-                std::ptr::null(), 0, callbacks)));
+            let data_ptr = data.vorbis.as_mut_ptr();
+            check_errors(tremor_sys::ov_open_callbacks(
+                data_ptr as *mut libc::c_void,
+                data_ptr,
+                std::ptr::null(),
+                0,
+                callbacks,
+            ))?;
         }
 
-        Ok(Decoder {
-            data: data,
-        })
+        let data: Box<DecoderData<R>> = unsafe { std::mem::transmute(data) };
+
+        Ok(Decoder { data })
     }
 
     pub fn time_seek(&mut self, s: i64) -> Result<(), VorbisError> {
