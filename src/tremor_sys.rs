@@ -4,11 +4,11 @@
 
 extern crate libc;
 
-use libc::{c_int, c_long, c_char, c_void};
+use libc::{c_char, c_int, c_long, c_void};
 
 pub use ogg_sys::ogg_int64_t;
-pub type ogg_int32_t = libc::int32_t;
-pub type ogg_uint32_t = libc::uint32_t;
+pub type ogg_int32_t = i32;
+pub type ogg_uint32_t = u32;
 
 pub const OV_FALSE: c_int = -1;
 pub const OV_EOF: c_int = -2;
@@ -102,11 +102,11 @@ pub struct vorbis_comment {
 
 #[repr(C)]
 pub struct ov_callbacks {
-    pub read_func: extern fn(*mut c_void, libc::size_t, libc::size_t, *mut c_void)
-        -> libc::size_t,
-    pub seek_func: extern fn(*mut c_void, ogg_int64_t, c_int) -> c_int,
-    pub close_func: extern fn(*mut c_void) -> c_int,
-    pub tell_func: extern fn(*mut c_void) -> c_long,
+    pub read_func:
+        extern "C" fn(*mut c_void, libc::size_t, libc::size_t, *mut c_void) -> libc::size_t,
+    pub seek_func: extern "C" fn(*mut c_void, ogg_int64_t, c_int) -> c_int,
+    pub close_func: extern "C" fn(*mut c_void) -> c_int,
+    pub tell_func: extern "C" fn(*mut c_void) -> c_long,
 }
 
 pub const NOTOPEN: c_int = 0;
@@ -146,19 +146,35 @@ pub struct OggVorbis_File {
     pub callbacks: ov_callbacks,
 }
 
-extern {
+extern "C" {
     pub fn ov_clear(vf: *mut OggVorbis_File) -> c_int;
-    pub fn ov_open(f: *mut libc::FILE, vf: *mut OggVorbis_File, initial: *const c_char,
-        ibytes: c_long) -> c_int;
-    pub fn ov_open_callbacks(datasource: *mut c_void, vf: *mut OggVorbis_File,
-        initial: *const c_char, ibytes: c_long, callbacks: ov_callbacks)
-        -> c_int;
+    pub fn ov_open(
+        f: *mut libc::FILE,
+        vf: *mut OggVorbis_File,
+        initial: *const c_char,
+        ibytes: c_long,
+    ) -> c_int;
+    pub fn ov_open_callbacks(
+        datasource: *mut c_void,
+        vf: *mut OggVorbis_File,
+        initial: *const c_char,
+        ibytes: c_long,
+        callbacks: ov_callbacks,
+    ) -> c_int;
 
-    pub fn ov_test(f: *mut libc::FILE, vf: *mut OggVorbis_File, initial: *const c_char,
-        ibytes: c_long) -> c_int;
-    pub fn ov_test_callbacks(datasource: *mut c_void, vf: *mut OggVorbis_File,
-        initial: *const c_char, ibytes: c_long, callbacks: ov_callbacks)
-        -> c_int;
+    pub fn ov_test(
+        f: *mut libc::FILE,
+        vf: *mut OggVorbis_File,
+        initial: *const c_char,
+        ibytes: c_long,
+    ) -> c_int;
+    pub fn ov_test_callbacks(
+        datasource: *mut c_void,
+        vf: *mut OggVorbis_File,
+        initial: *const c_char,
+        ibytes: c_long,
+        callbacks: ov_callbacks,
+    ) -> c_int;
     pub fn ov_test_open(vf: *mut OggVorbis_File) -> c_int;
 
     pub fn ov_bitrate(vf: *mut OggVorbis_File, i: c_int) -> c_long;
@@ -184,7 +200,13 @@ extern {
     pub fn ov_info(vf: *mut OggVorbis_File, link: c_int) -> *mut vorbis_info;
     pub fn ov_comment(vf: *mut OggVorbis_File, link: c_int) -> *mut vorbis_comment;
 
-    pub fn ov_read(vf: *mut OggVorbis_File, buffer: *mut c_char, length: c_int,
-        bigendianp: c_int, word: c_int, sgned: c_int,
-        bitstream: *mut c_int) -> c_long;
+    pub fn ov_read(
+        vf: *mut OggVorbis_File,
+        buffer: *mut c_char,
+        length: c_int,
+        bigendianp: c_int,
+        word: c_int,
+        sgned: c_int,
+        bitstream: *mut c_int,
+    ) -> c_long;
 }

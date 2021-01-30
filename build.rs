@@ -1,13 +1,12 @@
-extern crate pkg_config;
 extern crate cc;
+extern crate pkg_config;
 
 use std::path::PathBuf;
 
 fn main() {
-    match pkg_config::probe_library("vorbisidec") {
-        Ok(_) => return,
-        Err(..) => {}
-    };
+    if pkg_config::probe_library("vorbisidec").is_ok() {
+        return;
+    }
 
     let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
 
@@ -17,20 +16,20 @@ fn main() {
     println!("cargo:include={}", tremor_include.display());
 
     cc::Build::new()
-                .file("tremor/mdct.c")
-                .file("tremor/block.c")
-                .file("tremor/window.c")
-                .file("tremor/synthesis.c")
-                .file("tremor/info.c")
-                .file("tremor/floor1.c")
-                .file("tremor/floor0.c")
-                .file("tremor/vorbisfile.c")
-                .file("tremor/res012.c")
-                .file("tremor/mapping0.c")
-                .file("tremor/registry.c")
-                .file("tremor/codebook.c")
-                .file("tremor/sharedbook.c")
-                .include(&tremor_include)
-                .include(&ogg_include)
-                .compile("libtremor.a");
+        .file("tremor/mdct.c")
+        .file("tremor/block.c")
+        .file("tremor/window.c")
+        .file("tremor/synthesis.c")
+        .file("tremor/info.c")
+        .file("tremor/floor1.c")
+        .file("tremor/floor0.c")
+        .file("tremor/vorbisfile.c")
+        .file("tremor/res012.c")
+        .file("tremor/mapping0.c")
+        .file("tremor/registry.c")
+        .file("tremor/codebook.c")
+        .file("tremor/sharedbook.c")
+        .include(&tremor_include)
+        .include(&ogg_include)
+        .compile("libtremor.a");
 }
