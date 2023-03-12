@@ -17,6 +17,7 @@ fn main() {
 
     cc::Build::new()
         .compiler("xtensa-esp32-elf-cc")
+        .flag("-mlongcalls")  // required for xtensa, only for mdct.c really.
         .file("tremor/mdct.c")
         .file("tremor/block.c")
         .file("tremor/window.c")
