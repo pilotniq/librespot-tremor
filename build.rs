@@ -16,6 +16,7 @@ fn main() {
     println!("cargo:include={}", tremor_include.display());
 
     cc::Build::new()
+        .compiler("xtensa-esp32-elf-cc")
         .file("tremor/mdct.c")
         .file("tremor/block.c")
         .file("tremor/window.c")
