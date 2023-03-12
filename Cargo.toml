@@ -8,7 +8,7 @@ license = "MIT"
 
 [dependencies]
 libc = "0.2.65"
-ogg-sys = "0.0.9"
+ogg-sys = { git = "https://github.com/pilotniq/ogg-sys", branch = "cc-replaces-gcc" }
 
 [build-dependencies]
 cc = "1.0.79"
